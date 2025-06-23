@@ -1,16 +1,17 @@
 const fs = require("fs").promises;
 const path = require("path");
 const tasksFilePath = path.join(__dirname, "..", "task.json");
-const writeTasksToFile = async (tasks) => {
-  await fs.writeFile(tasksFilePath, JSON.stringify(tasks, null, 2));
+const writeTasksToFile = async (tasksArray) => {
+  const dataObject = { tasks: tasksArray };
+  await fs.writeFile(tasksFilePath, JSON.stringify(dataObject, null, 2));
 };
 
 const Task = {
   findAll: async () => {
-    const fileData = await fs.readFile(tasksFilePath, "utf8");
-    const tasks = JSON.parse(fileData);
-    return tasks;
-  },
+  const fileData = await fs.readFile(tasksFilePath, "utf8");
+  const dataObject = JSON.parse(fileData);
+  return dataObject.tasks;
+},
   findById: async (id) => {
     const tasks = await Task.findAll();
     const task = tasks.find((t) => t.id == id);
