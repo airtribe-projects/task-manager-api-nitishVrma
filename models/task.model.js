@@ -1,24 +1,24 @@
-const fs = require("fs");
+const fs = require("fs").promises;
 const path = require("path");
 const tasksFilePath = path.join(__dirname, "..", "task.json");
-const writeTasksToFile = (tasks) => {
-  fs.writeFileSync(tasksFilePath, JSON.stringify(tasks, null, 2));
+const writeTasksToFile = async (tasks) => {
+  await fs.writeFile(tasksFilePath, JSON.stringify(tasks, null, 2));
 };
 
 const Task = {
-  findAll: () => {
-    const fileData = fs.readFileSync(tasksFilePath, "utf8");
+  findAll: async () => {
+    const fileData = await fs.readFile(tasksFilePath, "utf8");
     const tasks = JSON.parse(fileData);
     return tasks;
   },
-  findById: (id) => {
-    const tasks = Task.findAll();
+  findById: async (id) => {
+    const tasks = await Task.findAll();
     const task = tasks.find((t) => t.id == id);
     return task;
   },
 
-  create: (newTaskData) => {
-    const tasks = Task.findAll();
+  create: async (newTaskData) => {
+    const tasks = await Task.findAll();
     const newId =
       tasks.length > 0 ? Math.max(...tasks.map((t) => t.id)) + 1 : 1;
 
@@ -30,12 +30,12 @@ const Task = {
     };
 
     tasks.push(task);
-    writeTasksToFile(tasks);
+    await writeTasksToFile(tasks);
     return task;
   },
 
-  update: (id, updates) => {
-    const tasks = Task.findAll();
+  update: async (id, updates) => {
+    const tasks = await Task.findAll();
     const taskIndex = tasks.findIndex((t) => t.id == id);
 
     if (taskIndex === -1) {
@@ -44,18 +44,21 @@ const Task = {
 
     tasks[taskIndex] = { ...tasks[taskIndex], ...updates };
 
-    writeTasksToFile(tasks);
+    await writeTasksToFile(tasks);
     return tasks[taskIndex];
   },
 
-  remove: (id) => {
-    const tasks = Task.findAll();
-    const taskToDelete = Task.findById(id);
+  remove: async (id) => {
+    const tasks = await Task.findAll();
+    const taskToDelete = tasks.find((t) => t.id == id);
+
     if (!taskToDelete) {
       return null;
     }
+
     const remainingTasks = tasks.filter((t) => t.id != id);
-    writeTasksToFile(remainingTasks);
+
+    await writeTasksToFile(remainingTasks);
     return taskToDelete;
   },
 };
